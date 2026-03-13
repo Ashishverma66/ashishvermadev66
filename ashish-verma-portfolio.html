@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ashish Verma — AI & ML Engineer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #16161f;
+      --border: rgba(255,255,255,0.06);
+      --border-bright: rgba(255,255,255,0.12);
+      --text: #e8e8f0;
+      --text-dim: rgba(232,232,240,0.5);
+      --text-muted: rgba(232,232,240,0.3);
+      --accent: #7c6ff7;
+      --accent2: #3ee8c8;
+      --accent3: #f7c96f;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* noise overlay */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 9999; opacity: 0.4;
+    }
+
+    .grid-bg {
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(124,111,247,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,111,247,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.25rem 3rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(20px);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 0.6rem;
+      font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--accent2); box-shadow: 0 0 12px var(--accent2);
+      animation: pulse 2s ease infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--text-dim);
+      font-size: 0.82rem; font-weight: 500; letter-spacing: 0.05em;
+      text-transform: uppercase; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      padding: 0.5rem 1.2rem;
+      background: transparent; border: 1px solid var(--border-bright);
+      border-radius: 6px; color: var(--text);
+      font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; text-decoration: none; letter-spacing: 0.03em;
+      transition: all 0.2s;
+    }
+    .nav-cta:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 16px rgba(124,111,247,0.2); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 9rem 2rem 6rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
+      width: 800px; height: 450px;
+      background: radial-gradient(ellipse, rgba(124,111,247,0.16) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-glow2 {
+      position: absolute; top: 50%; left: 20%;
+      width: 360px; height: 260px;
+      background: radial-gradient(ellipse, rgba(62,232,200,0.09) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 1rem; border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 100px; background: rgba(124,111,247,0.08);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;
+      color: var(--accent); margin-bottom: 2rem; letter-spacing: 0.08em;
+      animation: fadeUp 0.6s ease both;
+    }
+    .hero-badge::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent2); }
+
+    .hero-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(3.8rem, 9vw, 7.5rem);
+      font-weight: 300; line-height: 0.95; letter-spacing: -0.03em;
+      margin-bottom: 1.8rem;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+    .hero-title .hi { font-style: italic; color: var(--accent); }
+    .hero-title .hi2 { font-style: italic; color: var(--accent2); }
+
+    .hero-sub {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.88rem;
+      color: var(--text-dim); max-width: 520px; line-height: 1.75;
+      margin-bottom: 2.5rem;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.85rem 2rem; background: var(--accent); border: none;
+      border-radius: 8px; color: #fff; font-family: 'Syne', sans-serif;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+      box-shadow: 0 0 30px rgba(124,111,247,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(124,111,247,0.6); }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.85rem 2rem; background: transparent;
+      border: 1px solid var(--border-bright); border-radius: 8px;
+      color: var(--text); font-family: 'Syne', sans-serif;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+    }
+    .btn-outline:hover { border-color: var(--accent2); color: var(--accent2); transform: translateY(-2px); }
+
+    /* stat strip */
+    .stat-strip {
+      display: flex; justify-content: center; margin-top: 4rem;
+      border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
+      animation: fadeUp 0.8s 0.5s ease both; width: 100%; max-width: 700px;
+    }
+    .stat-item { flex: 1; padding: 1.5rem 1.5rem; text-align: center; border-right: 1px solid var(--border); }
+    .stat-item:last-child { border-right: none; }
+    .stat-val { font-family: 'Fraunces', serif; font-size: 2rem; font-weight: 400; color: var(--accent); display: block; }
+    .stat-key { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-top: 0.2rem; }
+
+    /* scroll indicator */
+    .scroll-hint {
+      margin-top: 3.5rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.68rem;
+      color: var(--text-muted); letter-spacing: 0.1em;
+      animation: fadeUp 0.8s 0.7s ease both;
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scrollAnim 1.8s ease infinite;
+    }
+    @keyframes scrollAnim { 0%{opacity:0;transform:scaleY(0);transform-origin:top} 50%{opacity:1} 100%{opacity:0;transform:scaleY(1)} }
+
+    /* ── SECTION BASE ── */
+    main { position: relative; z-index: 1; }
+    .section-wrap { max-width: 1200px; margin: 0 auto; padding: 7rem 2rem; }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+      color: var(--accent2); letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .section-label::before { content:''; width:20px; height:1px; background:var(--accent2); }
+    .section-title {
+      font-family: 'Fraunces', serif; font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 300; letter-spacing: -0.02em; line-height: 1.15;
+      margin-bottom: 1.2rem;
+    }
+    .section-desc { font-size: 0.92rem; color: var(--text-dim); max-width: 560px; line-height: 1.8; }
+
+    /* ── ABOUT ── */
+    .about-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+      align-items: center;
+    }
+    .about-left {}
+    .about-intro { font-size: 1.05rem; color: var(--text-dim); line-height: 1.85; margin-top: 1.5rem; }
+    .about-intro strong { color: var(--text); font-weight: 700; }
+
+    .skill-pills { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 2rem; }
+    .pill {
+      padding: 0.35rem 0.9rem;
+      border: 1px solid var(--border-bright); border-radius: 100px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+      color: var(--text-dim); transition: all 0.2s; cursor: default;
+    }
+    .pill:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,111,247,0.06); }
+    .pill.accent { border-color: rgba(124,111,247,0.35); color: var(--accent); background: rgba(124,111,247,0.08); }
+    .pill.green  { border-color: rgba(62,232,200,0.35); color: var(--accent2); background: rgba(62,232,200,0.07); }
+
+    .about-right {}
+    .about-cards { display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; }
+    .about-card {
+      padding: 1.4rem 1.6rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 10px; display: flex; gap: 1rem; align-items: flex-start;
+      transition: all 0.2s;
+    }
+    .about-card:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(124,111,247,0.08); }
+    .ac-icon { font-size: 1.3rem; flex-shrink: 0; padding-top: 0.1rem; }
+    .ac-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .ac-desc  { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-dim); line-height: 1.6; }
+
+    /* ── PROJECTS ── */
+    .projects-section {}
+
+    /* filter bar */
+    .filter-bar {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      margin-top: 2.5rem; margin-bottom: 3rem;
+    }
+    .filter-btn {
+      padding: 0.4rem 1rem;
+      background: transparent; border: 1px solid var(--border-bright);
+      border-radius: 100px; color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace; font-size: 0.72rem;
+      cursor: pointer; transition: all 0.2s; letter-spacing: 0.05em;
+    }
+    .filter-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+    .filter-btn.active {
+      background: rgba(62,232,200,0.1); border-color: var(--accent2);
+      color: var(--accent2);
+    }
+
+    /* project grid */
+    .project-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5px;
+      background: var(--border); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+
+    .project-card {
+      background: var(--bg); padding: 0;
+      transition: background 0.25s; position: relative;
+      display: flex; flex-direction: column;
+    }
+    .project-card:hover { background: var(--surface); }
+    .project-card.hidden { display: none; }
+
+    .pc-inner {
+      padding: 2rem 2rem 1.5rem;
+      display: flex; flex-direction: column; height: 100%;
+      text-decoration: none; color: inherit;
+    }
+
+    .pc-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .pc-tag {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+      padding: 0.2rem 0.55rem; border-radius: 4px; letter-spacing: 0.06em;
+      font-weight: 500;
+    }
+    .tag-ai       { background: rgba(124,111,247,0.12); color: var(--accent);  border: 1px solid rgba(124,111,247,0.25); }
+    .tag-cv       { background: rgba(62,232,200,0.1);  color: var(--accent2); border: 1px solid rgba(62,232,200,0.25);  }
+    .tag-ml       { background: rgba(247,201,111,0.1); color: var(--accent3); border: 1px solid rgba(247,201,111,0.25); }
+    .tag-nlp      { background: rgba(247,97,77,0.1);   color: #f7614d;        border: 1px solid rgba(247,97,77,0.25);   }
+    .tag-python   { background: rgba(255,255,255,0.05);color: var(--text-dim);border: 1px solid var(--border-bright);   }
+
+    .pc-lang {
+      font-family: 'JetBrains Mono', monospace; font-size: 0.65rem;
+      color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem;
+    }
+    .lang-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .lang-py  { background: #3572A5; }
+    .lang-nb  { background: #DA5B0B; }
+
+    .pc-icon { font-size: 1.6rem; margin-bottom: 0.8rem; }
+    .pc-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.5rem; letter-spacing: -0.01em; line-height: 1.3; }
+    .pc-desc  { font-size: 0.8rem; color: var(--text-dim); line-height: 1.65; flex: 1; }
+
+    .pc-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--border);
+    }
+    .pc-date { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); }
+    .pc-arrow {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1px solid var(--border-bright);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; color: var(--text-dim);
+      transition: all 0.2s;
+    }
+    .project-card:hover .pc-arrow {
+      border-color: var(--accent2); color: var(--accent2);
+      box-shadow: 0 0 12px rgba(62,232,200,0.2);
+    }
+
+    /* ── CONTACT ── */
+    .contact-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+    .contact-left {}
+    .contact-info { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+    .contact-row {
+      display: flex; align-items: center; gap: 1rem;
+      padding: 1rem 1.2rem; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 10px;
+      text-decoration: none; color: var(--text); transition: all 0.2s;
+    }
+    .contact-row:hover { border-color: var(--accent); box-shadow: 0 0 20px rgba(124,111,247,0.08); }
+    .cr-icon { font-size: 1.1rem; }
+    .cr-label { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .cr-val { font-size: 0.88rem; font-weight: 600; }
+
+    .contact-right {}
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-label { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
+    .form-input, .form-textarea {
+      background: var(--bg); border: 1px solid var(--border-bright);
+      border-radius: 8px; padding: 0.8rem 1rem;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.82rem;
+      color: var(--text); outline: none; transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-textarea { resize: vertical; min-height: 120px; }
+    .form-submit {
+      padding: 0.9rem; background: var(--accent); border: none;
+      border-radius: 8px; color: #fff; font-family: 'Syne', sans-serif;
+      font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      box-shadow: 0 0 24px rgba(124,111,247,0.35);
+    }
+    .form-submit:hover { box-shadow: 0 0 40px rgba(124,111,247,0.55); transform: translateY(-1px); }
+    .form-note { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-muted); text-align: center; }
+
+    /* ── FOOTER ── */
+    .site-footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 3rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: relative; z-index: 1;
+    }
+    .footer-left { display: flex; flex-direction: column; gap: 0.3rem; }
+    .footer-name { font-size: 0.9rem; font-weight: 700; }
+    .footer-sub { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--text-muted); }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a { text-decoration: none; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 0.73rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent2); }
+
+    /* ── DIVIDER ── */
+    .divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border-bright), transparent); }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 960px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .about-grid  { grid-template-columns: 1fr; gap: 3rem; }
+      .project-grid { grid-template-columns: repeat(2,1fr); }
+      .contact-grid { grid-template-columns: 1fr; gap: 3rem; }
+    }
+    @media (max-width: 600px) {
+      .project-grid { grid-template-columns: 1fr; }
+      .stat-strip   { flex-wrap: wrap; }
+      .site-footer  { flex-direction: column; gap: 1.5rem; text-align: center; padding: 2rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="dot"></div>
+    AV · PORTFOLIO
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="https://github.com/Ashishverma66" target="_blank" class="nav-cta">↗ GitHub</a>
+</nav>
+
+<main>
+
+  <!-- ── HERO ── -->
+  <section class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-glow2"></div>
+
+    <span class="hero-badge">AI ENGINEER · PYTHON · COMPUTER VISION · ML</span>
+
+    <h1 class="hero-title">
+      Hi, I'm<br/><span class="hi">Ashish</span><br/><span class="hi2">Verma</span>
+    </h1>
+
+    <p class="hero-sub">
+      An AI programmer continuously building intelligent systems —<br/>
+      from RAG pipelines and vision models to NLP and real-time CV apps.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#projects" class="btn-primary">⌘ View My Projects</a>
+      <a href="#contact"  class="btn-outline">→ Get in Touch</a>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat-item">
+        <span class="stat-val">16</span>
+        <span class="stat-key">Repositories</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">AI / ML</span>
+        <span class="stat-key">Focus Area</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">Python</span>
+        <span class="stat-key">Primary Stack</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-val">Open</span>
+        <span class="stat-key">to Opportunities</span>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <span>SCROLL</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ── ABOUT ── -->
+  <section class="about-section" id="about">
+    <div class="section-wrap">
+      <div class="about-grid fade-in">
+        <div class="about-left">
+          <div class="section-label">About Me</div>
+          <h2 class="section-title">Building AI,<br/><em>One Repo at a Time</em></h2>
+          <p class="about-intro">
+            I'm an <strong>AI programmer</strong> based in India who is continuously building his repository of projects and learning in the process. My work spans the full spectrum of applied AI — from building RAG-powered knowledge agents to real-time computer vision systems and classical machine learning pipelines.
+          </p>
+          <p class="about-intro" style="margin-top:1rem;">
+            I'm passionate about writing <strong>clean, readable code</strong> that makes complex ML concepts approachable, and I enjoy turning research papers into working systems. Currently open to AI/ML engineering roles and collaborations.
+          </p>
+          <div class="skill-pills">
+            <span class="pill accent">OpenAI / GPT-4</span>
+            <span class="pill accent">LangChain</span>
+            <span class="pill accent">Agno Framework</span>
+            <span class="pill green">OpenCV</span>
+            <span class="pill green">YOLOv8</span>
+            <span class="pill green">Computer Vision</span>
+            <span class="pill">RAG Pipelines</span>
+            <span class="pill">Vector DBs</span>
+            <span class="pill">LanceDB · ChromaDB</span>
+            <span class="pill">Scikit-learn</span>
+            <span class="pill">FastAPI</span>
+            <span class="pill">Streamlit</span>
+            <span class="pill">Ollama</span>
+            <span class="pill">NLP / SVM</span>
+            <span class="pill">Python 3.x</span>
+            <span class="pill">Jupyter Notebooks</span>
+          </div>
+        </div>
+
+        <div class="about-right">
+          <div class="about-cards" style="margin-top:0.5rem;">
+            <div class="about-card">
+              <div class="ac-icon">🤖</div>
+              <div>
+                <div class="ac-title">AI Agents & RAG</div>
+                <div class="ac-desc">Building intelligent agents with retrieval-augmented generation using Agno, LangChain, Ollama and vector databases like LanceDB and ChromaDB.</div>
+              </div>
+            </div>
+            <div class="about-card">
+              <div class="ac-icon">👁️</div>
+              <div>
+                <div class="ac-title">Computer Vision</div>
+                <div class="ac-desc">Real-time CV systems with OpenCV and YOLOv8 — from parking space detection and face recognition to object detection and volume control via hand tracking.</div>
+              </div>
+            </div>
+            <div class="about-card">
+              <div class="ac-icon">📊</div>
+              <div>
+                <div class="ac-title">Machine Learning</div>
+                <div class="ac-desc">End-to-end ML pipelines from data preprocessing to model deployment — recommender systems, sentiment analysis, car price prediction with Streamlit frontends.</div>
+              </div>
+            </div>
+            <div class="about-card">
+              <div class="ac-icon">🔬</div>
+              <div>
+                <div class="ac-title">Continuous Learner</div>
+                <div class="ac-desc">Every project is a chance to implement something new. Currently exploring agentic AI, multi-modal models, and production ML deployment patterns.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROJECTS ── -->
+  <section class="projects-section" id="projects">
+    <div class="section-wrap">
+      <div class="section-label">Work</div>
+      <h2 class="section-title">All <em>Projects</em></h2>
+      <p class="section-desc">16 public repositories spanning AI agents, computer vision, NLP, machine learning, and more. Click any card to open the project.</p>
+
+      <!-- filter -->
+      <div class="filter-bar fade-in">
+        <button class="filter-btn active" data-filter="all">All (16)</button>
+        <button class="filter-btn" data-filter="ai">AI · Agents</button>
+        <button class="filter-btn" data-filter="cv">Computer Vision</button>
+        <button class="filter-btn" data-filter="ml">Machine Learning</button>
+        <button class="filter-btn" data-filter="nlp">NLP</button>
+        <button class="filter-btn" data-filter="python">Python Tools</button>
+      </div>
+
+      <div class="project-grid fade-in" id="projectGrid">
+
+        <!-- 1 -->
+        <div class="project-card" data-cat="ai">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Agno-Knowledge_base-Chatbot" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-ai">AI · RAG</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">🧠</div>
+            <div class="pc-title">Agno Knowledge Base Chatbot</div>
+            <p class="pc-desc">AI-powered document processing system with vector storage, semantic chunking and GPT-4 powered Q&A over custom PDFs. Built with Agno + LanceDB.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Feb 2026</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 2 -->
+        <div class="project-card" data-cat="ml">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Movie_recomender_using_TFID-and-Fast-Api" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-ml">ML · API</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">🎬</div>
+            <div class="pc-title">Movie Recommender (TF-IDF + FastAPI)</div>
+            <p class="pc-desc">Content-based movie recommendation engine using TF-IDF vectorisation, served as a REST API with FastAPI. Clean separation of model logic and API layer.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Feb 2026</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 3 -->
+        <div class="project-card" data-cat="ai">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Local-AI-Agent-With-Python-Ollama-Langchain-RAG" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-ai">AI · Local LLM</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">⚡</div>
+            <div class="pc-title">Local AI Agent — Ollama + LangChain + RAG</div>
+            <p class="pc-desc">Fully local AI agent using Ollama for on-device LLM inference combined with LangChain and RAG — no OpenAI key or internet required.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Nov 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 4 -->
+        <div class="project-card" data-cat="ai">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/RAG-web-scraper-using-Langchain-Ollama-ChromaDB" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-ai">RAG · Scraping</span>
+              <span class="pc-lang"><span class="lang-dot lang-nb"></span>Jupyter</span>
+            </div>
+            <div class="pc-icon">🔍</div>
+            <div class="pc-title">RAG Web Scraper — LangChain + ChromaDB</div>
+            <p class="pc-desc">Web scraper that feeds scraped content into a ChromaDB vector store, enabling RAG-powered Q&A over live web data using Ollama locally.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Nov 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 5 -->
+        <div class="project-card" data-cat="cv">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Volume_Control_using_webcam" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-cv">CV · Hand Tracking</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">🖐️</div>
+            <div class="pc-title">Gesture Volume Control</div>
+            <p class="pc-desc">Control your system volume in real-time using hand gestures detected via webcam. Built with OpenCV and MediaPipe hand-tracking landmarks.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated May 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 6 -->
+        <div class="project-card" data-cat="nlp">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Sentiment_Analysis" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-nlp">NLP · SVM</span>
+              <span class="pc-lang"><span class="lang-dot lang-nb"></span>Jupyter</span>
+            </div>
+            <div class="pc-icon">💬</div>
+            <div class="pc-title">Sentiment Analysis (NLP + SVM)</div>
+            <p class="pc-desc">Text classification pipeline using NLP preprocessing and Support Vector Machines to predict positive/negative sentiment. Includes data cleaning and feature extraction.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated May 2025 · ⭐ 1</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 7 -->
+        <div class="project-card" data-cat="cv">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Face_detection_project" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-cv">CV · Detection</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">👤</div>
+            <div class="pc-title">Face Detection Project</div>
+            <p class="pc-desc">First Computer Vision project — real-time face detection using OpenCV's Haar cascades and DNN module to locate and annotate faces from live webcam feed.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated May 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 8 -->
+        <div class="project-card" data-cat="ml">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Recommender-System" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-ml">ML · Recommender</span>
+              <span class="pc-lang"><span class="lang-dot lang-nb"></span>Jupyter</span>
+            </div>
+            <div class="pc-icon">🎯</div>
+            <div class="pc-title">Recommender System</div>
+            <p class="pc-desc">Collaborative and content-based filtering recommender system implemented from scratch in a Jupyter notebook — exploring the maths behind recommendations.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated May 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 9 -->
+        <div class="project-card" data-cat="cv">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Color_Detector" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-cv">CV · Image</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">🎨</div>
+            <div class="pc-title">Color Detector</div>
+            <p class="pc-desc">Click anywhere on an image to detect and identify the exact colour name using a CSV colour dataset and Euclidean distance — built with OpenCV and pandas.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Apr 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 10 -->
+        <div class="project-card" data-cat="cv">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Basic_Image_Manipulation" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-cv">CV · Fundamentals</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">🖼️</div>
+            <div class="pc-title">Basic Image Manipulation</div>
+            <p class="pc-desc">Foundational image processing operations — resizing, cropping, rotation, blurring, edge detection and colour space transformations using OpenCV.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Apr 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 11 -->
+        <div class="project-card" data-cat="cv">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Parking_spaces" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-cv">CV · Real-Time</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">🅿️</div>
+            <div class="pc-title">Parking Space Counter</div>
+            <p class="pc-desc">Real-time parking space detection system using adaptive thresholding and pixel-count analysis on video feed. Interactive space picker + live free/occupied counter.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Apr 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 12 -->
+        <div class="project-card" data-cat="ml">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Car-price-Predicting-AI" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-ml">ML · Streamlit</span>
+              <span class="pc-lang"><span class="lang-dot lang-nb"></span>Jupyter</span>
+            </div>
+            <div class="pc-icon">🚗</div>
+            <div class="pc-title">Car Price Prediction AI</div>
+            <p class="pc-desc">First Streamlit + Linear Regression project — predicts used car prices from features like brand, mileage and year with an interactive web UI for real-time inference.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Mar 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 13 -->
+        <div class="project-card" data-cat="ml">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Machine-learning-Notebooks" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-ml">ML · Notebooks</span>
+              <span class="pc-lang"><span class="lang-dot lang-nb"></span>Jupyter</span>
+            </div>
+            <div class="pc-icon">📓</div>
+            <div class="pc-title">Machine Learning Notebooks</div>
+            <p class="pc-desc">Collection of data preprocessing and model training notebooks covering feature engineering, cross-validation, various classifiers and evaluation metrics.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Mar 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 14 -->
+        <div class="project-card" data-cat="cv">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Object_detection_Yolo" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-cv">CV · YOLOv8</span>
+              <span class="pc-lang"><span class="lang-dot lang-nb"></span>Jupyter</span>
+            </div>
+            <div class="pc-icon">🎯</div>
+            <div class="pc-title">Object Detection — YOLOv8</div>
+            <p class="pc-desc">Object detection projects using YOLOv8l pretrained model and a custom-trained YOLOv8 with Roboflow dataset — covering both inference and fine-tuning workflows.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Mar 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 15 -->
+        <div class="project-card" data-cat="python">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/TicTacToe-project" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-python">Python · Game</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">⭕</div>
+            <div class="pc-title">TicTacToe</div>
+            <p class="pc-desc">Classic Tic-Tac-Toe game implemented in Python — a clean logic exercise covering game state management, win detection, and user input handling.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Jan 2025</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- 16 -->
+        <div class="project-card" data-cat="python">
+          <a class="pc-inner" href="https://github.com/Ashishverma66/Scrapper-python-project-" target="_blank" rel="noopener">
+            <div class="pc-top">
+              <span class="pc-tag tag-python">Python · Scraping</span>
+              <span class="pc-lang"><span class="lang-dot lang-py"></span>Python</span>
+            </div>
+            <div class="pc-icon">🕷️</div>
+            <div class="pc-title">Web Scraper</div>
+            <p class="pc-desc">Python web scraper project using BeautifulSoup/requests to extract structured data from websites — an early exploration of data collection pipelines.</p>
+            <div class="pc-footer">
+              <span class="pc-date">Updated Dec 2024</span>
+              <span class="pc-arrow">↗</span>
+            </div>
+          </a>
+        </div>
+
+      </div><!-- /project-grid -->
+    </div>
+  </section>
+
+  <!-- ── CONTACT ── -->
+  <section class="contact-section" id="contact">
+    <div class="section-wrap">
+      <div class="contact-grid fade-in">
+        <div class="contact-left">
+          <div class="section-label">Contact</div>
+          <h2 class="section-title">Let's <em>Connect</em></h2>
+          <p class="section-desc">Open to AI/ML engineering roles, collaborations, and interesting project discussions. Feel free to reach out.</p>
+
+          <div class="contact-info">
+            <a href="https://github.com/Ashishverma66" target="_blank" class="contact-row">
+              <span class="cr-icon">⌥</span>
+              <div>
+                <div class="cr-label">GitHub</div>
+                <div class="cr-val">github.com/Ashishverma66</div>
+              </div>
+            </a>
+            <div class="contact-row" style="cursor:default;">
+              <span class="cr-icon">📍</span>
+              <div>
+                <div class="cr-label">Location</div>
+                <div class="cr-val">India</div>
+              </div>
+            </div>
+            <div class="contact-row" style="cursor:default;">
+              <span class="cr-icon">🎯</span>
+              <div>
+                <div class="cr-label">Open To</div>
+                <div class="cr-val">AI/ML Roles · Freelance · Collaborations</div>
+              </div>
+            </div>
+            <div class="contact-row" style="cursor:default;">
+              <span class="cr-icon">🛠️</span>
+              <div>
+                <div class="cr-label">Primary Stack</div>
+                <div class="cr-val">Python · OpenCV · LangChain · OpenAI</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-right">
+          <div class="section-label" style="visibility:hidden;">Spacer</div>
+          <h2 class="section-title">Send a<br/><em>Message</em></h2>
+          <form class="contact-form" onsubmit="handleForm(event)">
+            <div class="form-group">
+              <label class="form-label">Your Name</label>
+              <input class="form-input" type="text" placeholder="Jane Smith" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input class="form-input" type="email" placeholder="jane@company.com" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Message</label>
+              <textarea class="form-textarea" placeholder="Hi Ashish, I'd love to discuss..." required></textarea>
+            </div>
+            <button class="form-submit" type="submit">Send Message ↗</button>
+            <p class="form-note" id="formNote"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="divider"></div>
+
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+  <div class="footer-left">
+    <div class="footer-name">Ashish Verma — AI & ML Engineer</div>
+    <div class="footer-sub">16 Projects · Python · OpenCV · LangChain · OpenAI · Agno</div>
+  </div>
+  <div class="footer-links">
+    <a href="https://github.com/Ashishverma66" target="_blank">GitHub →</a>
+    <a href="#projects">Projects →</a>
+    <a href="#about">About →</a>
+    <a href="#contact">Contact →</a>
+  </div>
+</footer>
+
+<script>
+  /* ── FILTER ── */
+  const btns  = document.querySelectorAll('.filter-btn');
+  const cards = document.querySelectorAll('.project-card');
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      cards.forEach(card => {
+        if (filter === 'all' || card.dataset.cat === filter) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    });
+  });
+
+  /* ── SCROLL FADE-IN ── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  /* ── FORM ── */
+  function handleForm(e) {
+    e.preventDefault();
+    const note = document.getElementById('formNote');
+    note.style.color = 'var(--accent2)';
+    note.textContent = '✓ Message sent! Ashish will get back to you soon.';
+    e.target.reset();
+  }
+
+  /* ── NAV ACTIVE STATE ── */
+  const sections = document.querySelectorAll('section[id], div.hero');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id || 'top'; });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--text)' : '';
+    });
+  });
+</script>
+</body>
+</html>
