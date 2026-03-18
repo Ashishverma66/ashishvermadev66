@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agno Knowledge — AI-Powered Document Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #16161f;
+      --border: rgba(255,255,255,0.06);
+      --border-bright: rgba(255,255,255,0.12);
+      --text: #e8e8f0;
+      --text-dim: rgba(232,232,240,0.5);
+      --text-muted: rgba(232,232,240,0.3);
+      --accent: #7c6ff7;
+      --accent2: #3ee8c8;
+      --accent3: #f7c96f;
+      --glow: rgba(124,111,247,0.25);
+      --glow2: rgba(62,232,200,0.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Syne', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ── GRID BG ── */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(124,111,247,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,111,247,0.04) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 3rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(20px);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-logo .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent2);
+      box-shadow: 0 0 12px var(--accent2);
+      animation: pulse 2s ease infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.2rem;
+      background: transparent;
+      border: 1px solid var(--border-bright);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 0.03em;
+      transition: all 0.2s;
+    }
+
+    .nav-cta:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 0 16px rgba(124,111,247,0.2);
+    }
+
+    /* ── MAIN CONTAINER ── */
+    main { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8rem 2rem 6rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 400px;
+      background: radial-gradient(ellipse, rgba(124,111,247,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-glow2 {
+      position: absolute;
+      top: 40%;
+      left: 30%;
+      width: 400px;
+      height: 300px;
+      background: radial-gradient(ellipse, rgba(62,232,200,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem;
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 100px;
+      background: rgba(124,111,247,0.08);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-bottom: 2rem;
+      letter-spacing: 0.08em;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero-badge::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+    }
+
+    .hero-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(3.5rem, 8vw, 7rem);
+      font-weight: 300;
+      line-height: 1.0;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      animation: fadeUp 0.7s 0.1s ease both;
+    }
+
+    .hero-title .highlight {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .hero-title .highlight2 {
+      font-style: italic;
+      color: var(--accent2);
+    }
+
+    .hero-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 3rem;
+      animation: fadeUp 0.7s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.7s 0.3s ease both;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+      box-shadow: 0 0 30px rgba(124,111,247,0.4);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(124,111,247,0.6);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 2rem;
+      background: transparent;
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      transform: translateY(-2px);
+    }
+
+    /* ── HERO TERMINAL ── */
+    .hero-terminal {
+      margin-top: 5rem;
+      width: 100%;
+      max-width: 700px;
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      overflow: hidden;
+      text-align: left;
+      animation: fadeUp 0.8s 0.4s ease both;
+      box-shadow: 0 0 60px rgba(124,111,247,0.1), 0 40px 80px rgba(0,0,0,0.4);
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.85rem 1.2rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .t-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .t-dot.red { background: #ff5f57; }
+    .t-dot.yellow { background: #febc2e; }
+    .t-dot.green { background: #28c840; }
+
+    .terminal-title {
+      flex: 1;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .terminal-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      line-height: 1.8;
+    }
+
+    .t-line { display: flex; gap: 0.6rem; }
+    .t-prompt { color: var(--accent2); }
+    .t-cmd { color: var(--text); }
+    .t-output { color: var(--text-dim); padding-left: 1.1rem; }
+    .t-success { color: var(--accent2); padding-left: 1.1rem; }
+    .t-accent { color: var(--accent); }
+    .t-blank { height: 0.5rem; }
+
+    .t-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1em;
+      background: var(--accent);
+      margin-left: 2px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+    }
+
+    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+    /* ── SECTION ── */
+    section {
+      padding: 7rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent2);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+
+    .section-label::before {
+      content: '';
+      width: 20px;
+      height: 1px;
+      background: var(--accent2);
+    }
+
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-desc {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      max-width: 580px;
+      line-height: 1.8;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .pipeline {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0;
+      margin-top: 4rem;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .pipeline-step {
+      padding: 2.5rem 2rem;
+      border-right: 1px solid var(--border);
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .pipeline-step:last-child { border-right: none; }
+
+    .pipeline-step:hover {
+      background: var(--surface2);
+    }
+
+    .step-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .step-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .step-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      letter-spacing: -0.01em;
+    }
+
+    .step-desc {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .step-arrow {
+      position: absolute;
+      right: -14px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      background: var(--bg);
+      border: 1px solid var(--border-bright);
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      color: var(--accent);
+    }
+
+    /* ── FEATURES GRID ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 4rem;
+    }
+
+    .feature-card {
+      background: var(--bg);
+      padding: 2.5rem;
+      transition: background 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 0% 0%, rgba(124,111,247,0.06) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:hover { background: var(--surface); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: rgba(124,111,247,0.12);
+      border: 1px solid rgba(124,111,247,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .feature-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-desc {
+      font-size: 0.83rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+    }
+
+    /* ── TECH STACK ── */
+    .tech-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tech-section section {
+      display: flex;
+      gap: 4rem;
+      align-items: flex-start;
+    }
+
+    .tech-left { flex: 1; }
+    .tech-right { flex: 1.2; }
+
+    .tech-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .tech-card {
+      padding: 1.2rem 1.4rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .tech-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(124,111,247,0.1);
+    }
+
+    .tc-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.3rem;
+    }
+
+    .tc-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .tc-desc {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* ── CODE VIEWER ── */
+    .code-viewer {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 3rem;
+    }
+
+    .code-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .code-tab {
+      padding: 0.85rem 1.4rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .code-tab.active {
+      color: var(--accent2);
+      border-bottom-color: var(--accent2);
+      background: rgba(62,232,200,0.05);
+    }
+
+    .code-panel {
+      display: none;
+      padding: 2rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.9;
+      color: var(--text-dim);
+      overflow-x: auto;
+    }
+
+    .code-panel.active { display: block; }
+
+    .kw { color: #c792ea; }
+    .fn { color: #82aaff; }
+    .str { color: #c3e88d; }
+    .cm { color: #546e7a; font-style: italic; }
+    .cl { color: #ffcb6b; }
+    .op { color: var(--accent2); }
+
+    /* ── ARCHITECTURE ── */
+    .arch-diagram {
+      margin-top: 4rem;
+      position: relative;
+    }
+
+    .arch-grid {
+      display: grid;
+      grid-template-columns: 1fr 60px 1fr 60px 1fr;
+      gap: 0;
+      align-items: center;
+    }
+
+    .arch-box {
+      padding: 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      text-align: center;
+      position: relative;
+    }
+
+    .arch-box.highlight-box {
+      border-color: rgba(124,111,247,0.4);
+      box-shadow: 0 0 30px rgba(124,111,247,0.1);
+    }
+
+    .arch-box-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+
+    .arch-box-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .arch-box-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 1.3rem;
+    }
+
+    /* ── CHAT DEMO ── */
+    .chat-demo-wrap {
+      margin-top: 4rem;
+      border: 1px solid var(--border-bright);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.3);
+    }
+
+    .chat-header {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .chat-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .chat-name { font-size: 0.9rem; font-weight: 700; }
+    .chat-status {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent2);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .chat-status::before {
+      content: '';
+      width: 6px; height: 6px;
+      background: var(--accent2);
+      border-radius: 50%;
+    }
+
+    .chat-body {
+      background: var(--surface);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      min-height: 300px;
+    }
+
+    .chat-msg {
+      display: flex;
+      gap: 0.8rem;
+      max-width: 85%;
+    }
+
+    .chat-msg.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 1px solid var(--border-bright);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .msg-bubble {
+      padding: 0.9rem 1.2rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      line-height: 1.65;
+    }
+
+    .chat-msg.ai .msg-bubble {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 2px 12px 12px 12px;
+      color: var(--text);
+    }
+
+    .chat-msg.user .msg-bubble {
+      background: rgba(124,111,247,0.15);
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 12px 2px 12px 12px;
+      color: var(--text);
+    }
+
+    .msg-ref {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--accent2);
+      margin-top: 0.5rem;
+      padding: 0.3rem 0.6rem;
+      background: rgba(62,232,200,0.08);
+      border-left: 2px solid var(--accent2);
+      border-radius: 2px;
+    }
+
+    .chat-input-bar {
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      gap: 0.8rem;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      outline: none;
+    }
+
+    .chat-input:focus { border-color: var(--accent); }
+
+    .chat-send {
+      padding: 0.7rem 1.2rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chat-send:hover {
+      box-shadow: 0 0 20px rgba(124,111,247,0.5);
+      transform: translateY(-1px);
+    }
+
+    /* ── SETUP GUIDE ── */
+    .setup-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 4rem;
+    }
+
+    .setup-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .setup-card-header {
+      padding: 1.2rem 1.5rem;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .setup-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: rgba(124,111,247,0.15);
+      border: 1px solid rgba(124,111,247,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .setup-card-title { font-size: 0.9rem; font-weight: 700; }
+
+    .setup-body {
+      padding: 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      line-height: 1.8;
+      color: var(--text-dim);
+    }
+
+    .setup-body .cmd {
+      display: flex;
+      gap: 0.5rem;
+      margin: 0.3rem 0;
+    }
+
+    .setup-body .cmd-prompt { color: var(--accent2); }
+    .setup-body .cmd-text { color: var(--text); }
+    .setup-body .comment { color: var(--text-muted); font-style: italic; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-left {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .footer-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .footer-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .footer-links a {
+      text-decoration: none;
+      color: var(--text-dim);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--accent2); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── STAT STRIP ── */
+    .stat-strip {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      margin-top: 4rem;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      animation: fadeUp 0.8s 0.5s ease both;
+    }
+
+    .stat-item {
+      flex: 1;
+      padding: 1.5rem 2rem;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-val {
+      font-family: 'Fraunces', serif;
+      font-size: 2rem;
+      font-weight: 400;
+      color: var(--accent);
+      display: block;
+    }
+
+    .stat-key {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-top: 0.2rem;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .tech-section section { flex-direction: column; }
+      .setup-grid { grid-template-columns: 1fr; }
+      .arch-grid { grid-template-columns: 1fr; }
+      .arch-arrow { transform: rotate(90deg); }
+    }
+
+    @media (max-width: 600px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .pipeline { grid-template-columns: 1fr; }
+      .pipeline-step { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-strip { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">
+      <div class="dot"></div>
+      AGNO · KNOWLEDGE
+    </div>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#code">Code</a></li>
+      <li><a href="#setup">Setup</a></li>
+    </ul>
+    <a href="https://github.com/Ashishverma66/Agno-Knowledge_base-Chatbot" target="_blank" class="nav-cta">
+      ↗ GitHub
+    </a>
+  </nav>
+
+  <main>
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-glow"></div>
+      <div class="hero-glow2"></div>
+
+      <span class="hero-badge">AI · VECTOR SEARCH · SEMANTIC RETRIEVAL</span>
+
+      <h1 class="hero-title">
+        Intelligent<br/><span class="highlight">Document</span> &<br/>
+        <span class="highlight2">Knowledge</span> Engine
+      </h1>
+
+      <p class="hero-sub">
+        An AI-powered knowledge base that processes PDFs, creates semantic embeddings, and enables accurate question-answering grounded in your documents — zero hallucination.
+      </p>
+
+      <div class="hero-actions">
+        <a href="https://github.com/Ashishverma66/Agno-Knowledge_base-Chatbot" target="_blank" class="btn-primary">
+          ⌘ View Source Code
+        </a>
+        <a href="#architecture" class="btn-outline">
+          → Explore Architecture
+        </a>
+      </div>
+
+      <div class="stat-strip">
+        <div class="stat-item">
+          <span class="stat-val">GPT-4o</span>
+          <span class="stat-key">Language Model</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-val">LanceDB</span>
+          <span class="stat-key">Vector Store</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-val">Agno</span>
+          <span class="stat-key">Agent Framework</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-val">Semantic</span>
+          <span class="stat-key">Chunking Strategy</span>
+        </div>
+      </div>
+
+      <div class="hero-terminal">
+        <div class="terminal-bar">
+          <div class="t-dot red"></div>
+          <div class="t-dot yellow"></div>
+          <div class="t-dot green"></div>
+          <div class="terminal-title">agno-knowledge / main.py</div>
+        </div>
+        <div class="terminal-body">
+          <div class="t-line"><span class="t-prompt">$</span><span class="t-cmd">python main.py</span></div>
+          <div class="t-blank"></div>
+          <div class="t-output">⟳ Loading knowledge base from <span class="t-accent">vector_db/lancedb</span> ...</div>
+          <div class="t-output">⟳ Initializing OpenAI embeddings model ...</div>
+          <div class="t-success">✓ Knowledge base ready — 142 chunks indexed</div>
+          <div class="t-blank"></div>
+          <div class="t-output">Agent: <span class="t-accent">How can I help you today?</span></div>
+          <div class="t-blank"></div>
+          <div class="t-line"><span class="t-prompt">›</span><span class="t-cmd"> What hardware was used to train the Transformer?</span></div>
+          <div class="t-blank"></div>
+          <div class="t-success">✓ Retrieved 5 relevant chunks from knowledge base</div>
+          <div class="t-output">Agent: The Transformer was trained on 8 NVIDIA P100 GPUs.</div>
+          <div class="t-output">Base models trained for 12 hours (~100K steps), big models</div>
+          <div class="t-output">for 3.5 days (~300K steps). [Source: <span class="t-accent">attention_is_all_you_need.pdf</span>]</div>
+          <div class="t-blank"></div>
+          <div class="t-line"><span class="t-prompt">›</span><span class="t-cmd"> <span class="t-cursor"></span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <section id="architecture">
+      <div class="section-label">Pipeline</div>
+      <h2 class="section-title">How It <em>Works</em></h2>
+      <p class="section-desc">A clean 4-stage pipeline that turns raw PDF documents into a queryable AI knowledge base with semantic search and context-aware answers.</p>
+
+      <div class="pipeline fade-in">
+        <div class="pipeline-step">
+          <div class="step-num">01 / INGEST</div>
+          <span class="step-icon">📄</span>
+          <div class="step-title">PDF Processing</div>
+          <p class="step-desc">PyPDF extracts raw text from documents. Supports multi-page academic papers, reports, and technical docs.</p>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">02 / CHUNK</div>
+          <span class="step-icon">✂️</span>
+          <div class="step-title">Semantic Chunking</div>
+          <p class="step-desc">Documents split into contextually meaningful segments using semantic similarity — not just fixed character windows.</p>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">03 / EMBED</div>
+          <span class="step-icon">🧠</span>
+          <div class="step-title">Vector Embeddings</div>
+          <p class="step-desc">OpenAI embeddings convert each chunk to high-dimensional vectors capturing deep semantic meaning.</p>
+          <div class="step-arrow">→</div>
+        </div>
+        <div class="pipeline-step">
+          <div class="step-num">04 / ANSWER</div>
+          <span class="step-icon">💬</span>
+          <div class="step-title">RAG + GPT-4</div>
+          <p class="step-desc">Retrieval-Augmented Generation finds relevant chunks, feeds them as context to GPT-4 Mini for grounded answers.</p>
+        </div>
+      </div>
+
+      <!-- Architecture diagram -->
+      <div class="arch-diagram fade-in">
+        <div class="arch-grid">
+          <div class="arch-box">
+            <span class="arch-box-icon">🗂️</span>
+            <div class="arch-box-title">Documents</div>
+            <div class="arch-box-sub">PDF / Text files<br/>knowledge_base.py</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box highlight-box">
+            <span class="arch-box-icon">⚡</span>
+            <div class="arch-box-title">Agno Knowledge Base</div>
+            <div class="arch-box-sub">LanceDB · OpenAI Embeddings<br/>Semantic Chunking</div>
+          </div>
+          <div class="arch-arrow">→</div>
+          <div class="arch-box">
+            <span class="arch-box-icon">🤖</span>
+            <div class="arch-box-title">AI Agent</div>
+            <div class="arch-box-sub">GPT-4 Mini · Agno<br/>agent.py</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features">
+      <div class="section-label">Capabilities</div>
+      <h2 class="section-title">Built for Accuracy,<br/><em>Not Just Speed</em></h2>
+      <p class="section-desc">Every feature is designed to minimize hallucination and maximize retrieval precision across complex technical documents.</p>
+
+      <div class="features-grid fade-in">
+        <div class="feature-card">
+          <div class="feature-icon">📄</div>
+          <div class="feature-title">PDF-First Ingestion</div>
+          <p class="feature-desc">Native PDF reading via PyPDF with proper handling of academic papers, multi-column layouts, and technical content.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔬</div>
+          <div class="feature-title">Semantic Chunking</div>
+          <p class="feature-desc">Unlike naive character-based splitting, semantic chunking preserves logical thought units — better context, better retrieval.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <div class="feature-title">LanceDB Vector Store</div>
+          <p class="feature-desc">Embedded vector database — no server setup needed. Fast ANN search across thousands of document chunks locally.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <div class="feature-title">OpenAI Embeddings</div>
+          <p class="feature-desc">State-of-the-art text embeddings capture semantic meaning so similar concepts retrieve even without keyword overlap.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <div class="feature-title">Agno Agent Framework</div>
+          <p class="feature-desc">Built on Agno — a lightweight, composable framework for building production AI agents with tool use and memory.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <div class="feature-title">Anti-Hallucination</div>
+          <p class="feature-desc">Agent is explicitly instructed to reference only the knowledge base and say "I don't know" when information is unavailable.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEMO CHAT -->
+    <section>
+      <div class="section-label">Live Demo</div>
+      <h2 class="section-title">See It in <em>Action</em></h2>
+      <p class="section-desc">Querying "Attention is All You Need" — the transformer paper included in the knowledge base as a demonstration document.</p>
+
+      <div class="chat-demo-wrap fade-in">
+        <div class="chat-header">
+          <div class="chat-avatar">🧠</div>
+          <div>
+            <div class="chat-name">Agno Knowledge Agent</div>
+            <div class="chat-status">knowledge base active · 142 chunks</div>
+          </div>
+        </div>
+        <div class="chat-body">
+          <div class="chat-msg user">
+            <div class="msg-avatar">👤</div>
+            <div class="msg-bubble">What is the core idea behind the Transformer architecture?</div>
+          </div>
+          <div class="chat-msg ai">
+            <div class="msg-avatar">🧠</div>
+            <div>
+              <div class="msg-bubble">
+                The Transformer is built entirely on attention mechanisms, dispensing with recurrence and convolutions entirely. The key insight is that sequence transduction can be achieved through self-attention — allowing each position to attend to all positions in the encoder simultaneously, enabling much more parallelizable training.
+                <div class="msg-ref">📄 Source: attention_is_all_you_need.pdf · Section 3 (Model Architecture)</div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-msg user">
+            <div class="msg-avatar">👤</div>
+            <div class="msg-bubble">What hardware was used for training?</div>
+          </div>
+          <div class="chat-msg ai">
+            <div class="msg-avatar">🧠</div>
+            <div>
+              <div class="msg-bubble">
+                Training was conducted on 8 NVIDIA P100 GPUs. Base models took approximately 12 hours (100,000 steps), while the big model variants required 3.5 days with 300,000 training steps.
+                <div class="msg-ref">📄 Source: attention_is_all_you_need.pdf · Section 5.2 (Hardware and Schedule)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <input class="chat-input" type="text" placeholder="Ask about the attention paper..." />
+          <button class="chat-send">Send ↗</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TECH STACK -->
+    <div class="tech-section">
+      <section>
+        <div class="tech-left">
+          <div class="section-label">Stack</div>
+          <h2 class="section-title">Technology<br/><em>Choices</em></h2>
+          <p class="section-desc">Each component was chosen for production readiness and ease of local development — no heavy infrastructure required.</p>
+        </div>
+        <div class="tech-right">
+          <div class="tech-cards fade-in">
+            <div class="tech-card">
+              <div class="tc-label">Agent Framework</div>
+              <div class="tc-name">Agno</div>
+              <div class="tc-desc">Lightweight, composable Python AI agents</div>
+            </div>
+            <div class="tech-card">
+              <div class="tc-label">Language Model</div>
+              <div class="tc-name">GPT-4 Mini</div>
+              <div class="tc-desc">Cost-efficient reasoning via OpenAI API</div>
+            </div>
+            <div class="tech-card">
+              <div class="tc-label">Embeddings</div>
+              <div class="tc-name">OpenAI text-embedding-3</div>
+              <div class="tc-desc">State-of-the-art vector representations</div>
+            </div>
+            <div class="tech-card">
+              <div class="tc-label">Vector DB</div>
+              <div class="tc-name">LanceDB</div>
+              <div class="tc-desc">Serverless embedded vector database</div>
+            </div>
+            <div class="tech-card">
+              <div class="tc-label">PDF Processing</div>
+              <div class="tc-name">PyPDF</div>
+              <div class="tc-desc">Reliable Python PDF text extraction</div>
+            </div>
+            <div class="tech-card">
+              <div class="tc-label">Packaging</div>
+              <div class="tc-name">uv + pyproject.toml</div>
+              <div class="tc-desc">Modern Python dependency management</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- CODE -->
+    <section id="code">
+      <div class="section-label">Source</div>
+      <h2 class="section-title">Clean, <em>Readable</em> Code</h2>
+      <p class="section-desc">The entire project is under 200 lines spread across 3 focused Python files — easy to understand, extend, and demo.</p>
+
+      <div class="code-viewer fade-in">
+        <div class="code-tabs">
+          <div class="code-tab active" onclick="showTab('kb', this)">knowledge_base.py</div>
+          <div class="code-tab" onclick="showTab('agent', this)">agent.py</div>
+          <div class="code-tab" onclick="showTab('main', this)">main.py</div>
+        </div>
+
+        <div class="code-panel active" id="code-kb">
+<span class="cm"># knowledge_base.py — Sets up the vector store and document pipeline</span>
+<span class="kw">from</span> <span class="cl">agno.knowledge.pdf</span> <span class="kw">import</span> PDFKnowledgeBase
+<span class="kw">from</span> <span class="cl">agno.vectordb.lancedb</span> <span class="kw">import</span> LanceDb
+<span class="kw">from</span> <span class="cl">agno.embedder.openai</span> <span class="kw">import</span> OpenAIEmbedder
+<span class="kw">from</span> <span class="cl">agno.document.chunking.semantic</span> <span class="kw">import</span> SemanticChunking
+
+<span class="cm"># 1. Configure the embedder (OpenAI text-embedding-3-small)</span>
+<span class="fn">embedder</span> = OpenAIEmbedder()
+
+<span class="cm"># 2. Semantic chunking — context-aware document splitting</span>
+<span class="fn">chunking_strategy</span> = SemanticChunking(
+    embedder=embedder,
+    chunk_size=<span class="str">1000</span>
+)
+
+<span class="cm"># 3. LanceDB — serverless local vector database</span>
+<span class="fn">vector_db</span> = LanceDb(
+    uri=<span class="str">"vector_db/lancedb"</span>,
+    embedder=embedder,
+    table_name=<span class="str">"knowledge_table"</span>
+)
+
+<span class="cm"># 4. Assemble the knowledge base with our PDF document</span>
+<span class="fn">knowledge_base</span> = PDFKnowledgeBase(
+    path=<span class="str">"attention_is_all_you_need.pdf"</span>,
+    vector_db=vector_db,
+    chunking_strategy=chunking_strategy,
+)
+        </div>
+
+        <div class="code-panel" id="code-agent">
+<span class="cm"># agent.py — Creates the AI agent with knowledge base access</span>
+<span class="kw">from</span> <span class="cl">agno.agent</span> <span class="kw">import</span> Agent
+<span class="kw">from</span> <span class="cl">agno.models.openai</span> <span class="kw">import</span> OpenAIChat
+<span class="kw">from</span> <span class="cl">knowledge_base</span> <span class="kw">import</span> knowledge_base
+
+<span class="cm"># Configure AI agent with GPT-4 Mini + knowledge base search</span>
+<span class="fn">agent</span> = Agent(
+    model=OpenAIChat(id=<span class="str">"gpt-4o-mini"</span>),
+    knowledge=knowledge_base,
+    search_knowledge=<span class="str">True</span>,   <span class="cm"># Enables RAG retrieval</span>
+    instructions=[
+        <span class="str">"you are a helpful assistant"</span>,
+        <span class="str">"whenever asked about the paper, use the knowledge base"</span>,
+        <span class="str">"try not to hallucinate while responding"</span>,
+        <span class="str">"if you don't know the answer, say I don't know"</span>,
+    ],
+    markdown=<span class="str">True</span>,
+)
+        </div>
+
+        <div class="code-panel" id="code-main">
+<span class="cm"># main.py — Entry point: load KB and run queries</span>
+<span class="kw">from</span> <span class="cl">knowledge_base</span> <span class="kw">import</span> knowledge_base
+<span class="kw">from</span> <span class="cl">agent</span> <span class="kw">import</span> agent
+
+<span class="cm"># Load and index documents into vector database</span>
+knowledge_base.<span class="fn">load</span>(recreate=<span class="str">False</span>)  <span class="cm"># Set True to re-index</span>
+
+<span class="cm"># Run sample queries — general + knowledge-specific</span>
+agent.<span class="fn">print_response</span>(<span class="str">"Hi, how are you?"</span>)
+
+agent.<span class="fn">print_response</span>(
+    <span class="str">"What hardware was used for training the transformer?"</span>
+)
+
+agent.<span class="fn">print_response</span>(
+    <span class="str">"Explain the multi-head attention mechanism"</span>
+)
+        </div>
+      </div>
+    </section>
+
+    <!-- SETUP -->
+    <section id="setup">
+      <div class="section-label">Get Started</div>
+      <h2 class="section-title">Quick <em>Setup</em></h2>
+      <p class="section-desc">Running locally in under 3 minutes with uv — the modern Python package manager. Requires Python 3.13+ and an OpenAI API key.</p>
+
+      <div class="setup-grid fade-in">
+        <div class="setup-card">
+          <div class="setup-card-header">
+            <div class="setup-num">1</div>
+            <div class="setup-card-title">Clone & Install</div>
+          </div>
+          <div class="setup-body">
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">git clone https://github.com/Ashishverma66/</span></div>
+            <div class="cmd"><span class="cmd-prompt"> </span><span class="cmd-text">  Agno-Knowledge_base-Chatbot</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">cd Agno-Knowledge_base-Chatbot</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">uv venv &amp;&amp; source .venv/bin/activate</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">uv sync</span></div>
+          </div>
+        </div>
+
+        <div class="setup-card">
+          <div class="setup-card-header">
+            <div class="setup-num">2</div>
+            <div class="setup-card-title">Configure API Key</div>
+          </div>
+          <div class="setup-body">
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">cp .env.example .env</span></div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">nano .env</span></div>
+            <div style="height:0.5rem"></div>
+            <div class="comment"># Add your OpenAI key:</div>
+            <div class="cmd"><span class="cmd-prompt"> </span><span class="cmd-text">OPENAI_API_KEY=sk-...</span></div>
+          </div>
+        </div>
+
+        <div class="setup-card">
+          <div class="setup-card-header">
+            <div class="setup-num">3</div>
+            <div class="setup-card-title">Run the Agent</div>
+          </div>
+          <div class="setup-body">
+            <div class="comment"># First run indexes the PDF (takes ~30s)</div>
+            <div class="cmd"><span class="cmd-prompt">$</span><span class="cmd-text">python main.py</span></div>
+            <div style="height:0.5rem"></div>
+            <div class="comment"># To add your own PDFs, edit knowledge_base.py</div>
+            <div class="comment"># and set recreate=True on first load</div>
+          </div>
+        </div>
+
+        <div class="setup-card">
+          <div class="setup-card-header">
+            <div class="setup-num">4</div>
+            <div class="setup-card-title">Add Your Documents</div>
+          </div>
+          <div class="setup-body">
+            <div class="comment"># In knowledge_base.py, change the path:</div>
+            <div class="cmd"><span class="cmd-prompt"> </span><span class="cmd-text">path=<span style="color:#c3e88d">"your_doc.pdf"</span></span></div>
+            <div style="height:0.5rem"></div>
+            <div class="comment"># In main.py, set recreate=True once:</div>
+            <div class="cmd"><span class="cmd-prompt"> </span><span class="cmd-text">knowledge_base.load(recreate=True)</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="divider"></div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">
+      <div class="footer-name">Agno Knowledge Base · Built by Ashish Verma</div>
+      <div class="footer-sub">AI · RAG · Vector Search · Python 3.13+</div>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/Ashishverma66/Agno-Knowledge_base-Chatbot" target="_blank">GitHub →</a>
+      <a href="https://agno.com" target="_blank">Agno Docs →</a>
+      <a href="https://platform.openai.com" target="_blank">OpenAI →</a>
+    </div>
+  </footer>
+
+  <script>
+    // Tab switching for code viewer
+    function showTab(tabId, el) {
+      document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+      document.getElementById('code-' + tabId).classList.add('active');
+      el.classList.add('active');
+    }
+
+    // Scroll-triggered fade-in
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // Chat input demo interaction
+    const chatInput = document.querySelector('.chat-input');
+    const chatSend = document.querySelector('.chat-send');
+    const chatBody = document.querySelector('.chat-body');
+
+    function sendMessage() {
+      const val = chatInput.value.trim();
+      if (!val) return;
+
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg user';
+      userMsg.innerHTML = `<div class="msg-avatar">👤</div><div class="msg-bubble">${val}</div>`;
+      chatBody.appendChild(userMsg);
+      chatInput.value = '';
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      setTimeout(() => {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'chat-msg ai';
+        aiMsg.innerHTML = `
+          <div class="msg-avatar">🧠</div>
+          <div>
+            <div class="msg-bubble">
+              This is a static demo. In the live version, this agent queries the LanceDB vector store using your OpenAI embeddings to find relevant document chunks, then passes them as context to GPT-4 Mini for a grounded answer.
+              <div class="msg-ref">💡 Run locally with: python main.py</div>
+            </div>
+          </div>`;
+        chatBody.appendChild(aiMsg);
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 900);
+    }
+
+    chatSend.addEventListener('click', sendMessage);
+    chatInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+  </script>
+</body>
+</html>
